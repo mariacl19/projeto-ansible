@@ -1,0 +1,37 @@
+Vagrant.configure("2") do |config|
+  # Escolhe a box do Debian 12
+  config.vm.box = "generic/debian12"
+
+  # Define hostname
+  config.vm.hostname = "debian-ansible"
+
+  # Configurações de rede
+  config.vm.network "private_network", ip: "192.168.56.10"
+
+  # Pasta sincronizada
+  config.vm.synced_folder "C:/Users/Aluno/Desktop/projeto-ansible", "/home/vagrant/projeto-ansible"
+
+  # Provisionamento com shell script
+  config.vm.provision "shell", inline: <<-SHELL
+    # Atualiza pacotes
+    sudo apt-get update -y
+
+    # Instala dependências para adicionar o repositório do Ansible
+    sudo apt-get install -y software-properties-common curl gnupg2
+
+    # Adiciona a chave GPG do repositório do Ansible
+    curl -fsSL https://apt.ansible.com/ansible.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/ansible.gpg
+
+    # Adiciona o repositório do Ansible (usando Ubuntu Jammy como base)
+    echo "deb [arch=amd64] https://ppa.launchpadcontent.net/ansible/ansible/ubuntu jammy main" | sudo tee /etc/apt/sources.list.d/ansible.list
+
+    # Atualiza novamente os pacotes com o novo repositório
+    sudo apt-get update -y
+
+    # Instala o Ansible
+    sudo apt-get install -y ansible
+
+    # Verifica se o Ansible foi instalado corretamente
+    ansible --version
+  SHELL
+end
